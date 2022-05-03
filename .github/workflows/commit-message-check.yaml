@@ -1,10 +1,8 @@
 name: Commit Message Check
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+  worflow_run:
+    workflows: [Add force-skip-ci label for doc-only changes]
+    types: [completed] 
 
 env:
   error_msg: |+

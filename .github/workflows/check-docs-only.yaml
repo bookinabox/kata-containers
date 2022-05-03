@@ -1,0 +1,35 @@
+# Copyright (c) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: Add force-skip-ci label for doc-only changes
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+jobs:
+  check-doc-only-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Check for documentation-only changes
+        uses: technote-space/get-diff-action@v6
+        with:
+          PATTERNS: |
+            **
+            !docs/*
+        
+      - name: Add force-skip-ci label
+        if: ${{!env.GIT_DIFF}}
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: 
+            force-skip-ci

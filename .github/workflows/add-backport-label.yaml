@@ -1,12 +1,11 @@
 name: Add backport label
 
 on:
+  worflow_run:
+    workflows: [Add force-skip-ci label for doc-only changes]
+    types: [completed]
   pull_request:
     types:
-      - opened
-      - synchronize
-      - reopened
-      - edited
       - labeled
       - unlabeled
 
