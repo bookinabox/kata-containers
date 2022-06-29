@@ -248,7 +248,7 @@ show_runtime_configs()
 	# add in the standard defaults for good measure "just in case"
 	configs+=" /etc/kata-containers/configuration.toml"
 	configs+=" /usr/share/defaults/kata-containers/configuration.toml"
-	configs+=" /etc/kata-containers/configuration.toml"
+	configs+=" /etc/kata-containers/configuration.toml"	
 
 	# create a unique list of config files
 	configs=$(echo $configs|tr ' ' '\n'|sort -u)
@@ -487,7 +487,7 @@ show_meta()
 
 	date=$(date '+%Y-%m-%d.%H:%M:%S.%N%z')
 	msg "Running \`$script_name\` version \`$script_version\` at \`$date\`."
-
+	show_latest_kata_version
 	separator
 }
 
@@ -801,6 +801,21 @@ read_osbuilder_file()
 	cat "$file"
 }
 
+show_latest_kata_version()
+{
+	if [ -z "$KATA_CHECK_NO_NETWORK" ]; then
+		local rc=0
+		local latest_version=$(sudo -u nobody kata-runtime kata-check --check-version-only 2>/dev/null || rc=$?)
+		if [ "$rc" -ne 0 ]; then
+			msg "Unable to check for latest version. Check if network is connected"
+		else
+			msg "$latest_version"
+		fi
+	else
+		msg "KATA_CHECK_NO_NETWORK is set. Latest release cannot not be checked"
+	fi
+}
+
 show_details()
 {
 	show_header
@@ -821,6 +836,10 @@ show_details()
 
 main()
 {
+	if [ "$1" = "show-image-details" ]; then
+		image_details && initrd_details && exit 0 || die "failed to determine image details"
+	fi
+
 	args=$(getopt \
 		-n "$script_name" \
 		-a \
