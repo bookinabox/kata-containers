@@ -1,25 +1,28 @@
 name: Check 
 on: [pull_request]
 jobs:
+
+  get-cargo-dirs:
+    outputs:
+      dirs: ${{ steps.dirs.outputs.dirs }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get all Cargo.toml files in the project
+        id: dirs
+        run:
+          echo '::set-output name=dirs::[' $(find . -name 'Cargo.toml' | tr '\n' ', ') ']'
+
   cargo-deny:
     runs-on: ubuntu-latest
+    needs: get-cargo-dirs
     strategy:
       matrix:
         checks:
           - advisories
           - bans licenses sources
-        tomls: [./src/agent/Cargo.toml,
-                ./src/agent/rustjail/Cargo.toml,
-                ./src/agent/vsock-exporter/Cargo.toml,
-                ./src/libs/Cargo.toml,
-                ./src/libs/logging/Cargo.toml,
-                ./src/libs/oci/Cargo.toml,
-                ./src/libs/protocols/Cargo.toml,
-                ./src/libs/safe-path/Cargo.toml,
-                ./src/tools/agent-ctl/Cargo.toml,
-                ./src/tools/runk/libcontainer/Cargo.toml,
-                ./src/tools/runk/Cargo.toml,
-                ./src/tools/trace-forwarder/Cargo.toml]
+        dirs: ${{needs.get-cargo-dirs.dirs}}
 
     continue-on-error: ${{ matrix.checks == 'advisories' }}
 
@@ -31,4 +34,4 @@ jobs:
       uses: EmbarkStudios/cargo-deny-action@v1
       with:
         command: check ${{ matrix.checks }}
-        entrypoint: ${{ matrix.tomls }}
+        entrypoint: ${{ matrix.dirs }}
