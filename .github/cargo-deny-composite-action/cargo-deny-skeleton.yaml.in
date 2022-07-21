@@ -1,0 +1,11 @@
+name: 'Cargo Crates Check'
+description: 'Checks every Cargo.toml file using cargo-deny'
+inputs:
+  command:
+    description: Either 'advisories' or 'bans licenses sources'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3 
