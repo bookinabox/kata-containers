@@ -23,60 +23,61 @@ jobs:
           tar xz --strip-components=2 --wildcards '*/bin/hub' && \
           sudo install hub /usr/local/bin
 
-      - name: Install hub extension script
-        run: |
-          # Clone into a temporary directory to avoid overwriting
-          # any existing github directory.
-          pushd $(mktemp -d) &>/dev/null
-          git clone --single-branch --depth 1 "https://github.com/kata-containers/.github" && cd .github/scripts
-          sudo install hub-util.sh /usr/local/bin
-          popd &>/dev/null
-
       - name: Checkout code to allow hub to communicate with the project
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         uses: actions/checkout@v3
 
-      - name: Check issue for bug label
+
+      - name: Install hub extension script
+        run: |
+          pushd .github/scripts/
+          sudo install hub-util.sh /usr/local/bin
+          popd &>/dev/null
+
+      - name: Determine whether to add label 
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         env:
-          GITHUB_TOKEN: ${{ secrets.KATA_GITHUB_ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: check_for_bug
         run: |
           pr=${{ github.event.pull_request.number }}
 
-          linked_issue_urls=$(hub-util.sh \
-            list-issues-for-pr "$pr" |\
-            grep -v "^\#"  |\
-            cut -d';' -f3 || true)
+          #linked_issue_urls=$(hub-util.sh \
+          #  list-issues-for-pr "$pr" |\
+          #  grep -v "^\#"  |\
+          #  cut -d';' -f3 || true)
 
-          [ -z "$linked_issue_urls" ] && {
-            echo "::error::No linked issues for PR $pr"
-            exit 1
-          }
+          #[ -z "$linked_issue_urls" ] && {
+          #  echo "::error::No linked issues for PR $pr"
+          #  exit 1
+          #}
 
-          echo "::set-output name=has_bug::false"
-          for issue_url in $(echo "$linked_issue_urls")
-          do
+          #echo "::set-output name=has_bug::false"
+          #for issue_url in $(echo "$linked_issue_urls")
+          #do
 
-            issue=$(echo "$issue_url"| awk -F\/ '{print $NF}' || true)
+          #  issue=$(echo "$issue_url"| awk -F\/ '{print $NF}' || true)
 
-            [ -z "$issue" ] && {
-              echo "::error::Cannot determine issue number from $issue_url for PR $pr"
-              exit 1
-            }
+          #  [ -z "$issue" ] && {
+          #    echo "::error::Cannot determine issue number from $issue_url for PR $pr"
+          #    exit 1
+          #  }
 
-            labels=$(hub-util.sh list-labels-for-issue "$issue")
+          #  labels=$(hub-util.sh list-labels-for-issue "$issue")
             
-            label_names=$(echo $labels | jq -r '.[].name')
+          #  label_names=$(echo $labels | jq -r '.[].name')
 
-            if [[ "$label_names" =~ "bug" && "$label_names" != *"no-backport-needed"* ]]; then
-              echo "::set-output name=has_bug::true"
-              break
-            fi
+          #  if [[ "$label_names" =~ "bug" && "$label_names" != *"no-backport-needed"* ]]; then
+          #    echo "::set-output name=has_bug::true"
+          #    break
+          #  fi
+          #
+          #done
 
-          done
+          labels=$(hub-util.sh list-labels-for-pr || true)
+          echo "$labels"
       
-      - name: Add backport label if issue is a bug 
+      - name: Add backport label
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') && steps.check_for_bug.outputs.has_bug == 'true' }}
         uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
         with:
