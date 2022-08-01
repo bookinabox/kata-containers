@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2022 Red Hat
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: 'Cargo Crates Check'
+description: 'Checks every Cargo.toml file using cargo-deny'
+inputs:
+  command:
+    description: Either 'advisories' or 'bans licenses sources'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
