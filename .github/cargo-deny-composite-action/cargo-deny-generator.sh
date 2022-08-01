@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Copyright (c) 2022 Red Hat
+#
+# SPDX-License-Identifier: Apache-2.0
+
 script_dir=$(dirname "$(readlink -f "$0")")
 parent_dir=$(realpath "${script_dir}/../..")
 cidir="${parent_dir}/ci"

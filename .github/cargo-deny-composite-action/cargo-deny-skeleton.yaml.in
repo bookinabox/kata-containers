@@ -1,3 +1,8 @@
+#
+# Copyright (c) 2022 Red Hat
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: 'Cargo Crates Check'
 description: 'Checks every Cargo.toml file using cargo-deny'
 inputs:
@@ -8,4 +13,5 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3 
+    - name: Checkout Current Repository
+      uses: actions/checkout@v3
