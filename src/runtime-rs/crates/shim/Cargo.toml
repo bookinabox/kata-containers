@@ -21,7 +21,7 @@ libc = "0.2.108"
 log = "0.4.14"
 nix = "0.24.2"
 protobuf = "2.27.0"
-sha2 = "=0.9.3"
+sha2 = "^0.9.3"
 slog = {version = "2.5.2", features = ["std", "release_max_level_trace", "max_level_trace"]}
 slog-async = "2.5.2"
 slog-scope = "4.4.0"
