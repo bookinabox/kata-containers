@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "logging",
+    "oci",
     "safe-path",
     "protocols",
 ]
