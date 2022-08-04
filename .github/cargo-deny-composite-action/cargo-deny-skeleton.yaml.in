@@ -12,6 +12,4 @@ inputs:
 
 runs:
   using: "composite"
-  steps:
-    - name: Checkout Current Repository
-      uses: actions/checkout@v3
+  steps: 
