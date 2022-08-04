@@ -1,0 +1,83 @@
+name: 'Cargo Crates Check'
+description: 'Checks every Cargo.toml file using cargo-deny'
+inputs:
+  command:
+    description: Either 'advisories' or 'bans licenses sources'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: src/agent/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/agent/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/agent/rustjail/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/agent/rustjail/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/agent/vsock-exporter/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/agent/vsock-exporter/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/libs/logging/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/libs/logging/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/libs/oci/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/libs/oci/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/libs/protocols/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/libs/protocols/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/libs/safe-path/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/libs/safe-path/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/libs/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/libs/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/tools/agent-ctl/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/tools/agent-ctl/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/tools/runk/libcontainer/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/tools/runk/libcontainer/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/tools/runk/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/tools/runk/Cargo.toml
+        command: check ${{ inputs.command }}
+
+    - name: src/tools/trace-forwarder/Cargo.toml
+      uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        arguments: --manifest-path src/tools/trace-forwarder/Cargo.toml
+        command: check ${{ inputs.command }}
