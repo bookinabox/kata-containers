@@ -1,0 +1,17 @@
+name: Test Nproc
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  nproc-check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          nproc
+          nproc --ignore 1
+          echo "hi"
+          echo "$CI"
