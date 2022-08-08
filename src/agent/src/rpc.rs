@@ -302,14 +302,14 @@ impl AgentService {
             let mounts = sandbox.container_mounts.get(&cid);
             if let Some(mounts) = mounts {
                 for m in mounts.iter() {
-                    if sandbox.storages.get(m).is_some() {
+                    if sandbox.storages.get(&PathBuf::from(m)).is_some() {
                         cmounts.push(m.to_string());
                     }
                 }
             }
 
             for m in cmounts.iter() {
-                sandbox.unset_and_remove_sandbox_storage(m)?;
+                sandbox.unset_and_remove_sandbox_storage(&PathBuf::from(m))?;
             }
 
             sandbox.container_mounts.remove(cid.as_str());
