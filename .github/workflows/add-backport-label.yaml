@@ -39,7 +39,7 @@ jobs:
       - name: Check issue for bug label
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         env:
-          GITHUB_TOKEN: ${{ secrets.KATA_GITHUB_ACTIONS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: check_for_bug
         run: |
           pr=${{ github.event.pull_request.number }}
