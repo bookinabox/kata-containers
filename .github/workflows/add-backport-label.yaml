@@ -7,6 +7,8 @@ on:
       - synchronize
       - reopened
       - edited
+      - labeled
+      - unlabeled
 
 jobs:
   check-issues:
@@ -42,44 +44,82 @@ jobs:
         run: |
           pr=${{ github.event.pull_request.number }}
 
-          #linked_issue_urls=$(hub-util.sh \
-          #  list-issues-for-pr "$pr" |\
-          #  grep -v "^\#"  |\
-          #  cut -d';' -f3 || true)
+          linked_issue_urls=$(hub-util.sh \
+            list-issues-for-pr "$pr" |\
+            grep -v "^\#"  |\
+            cut -d';' -f3 || true)
 
-          #[ -z "$linked_issue_urls" ] && {
-          #  echo "::error::No linked issues for PR $pr"
-          #  exit 1
-          #}
+          [ -z "$linked_issue_urls" ] && {
+            echo "::error::No linked issues for PR $pr"
+            exit 1
+          }
 
-          #echo "::set-output name=has_bug::false"
-          #for issue_url in $(echo "$linked_issue_urls")
-          #do
+          has_bug=false
+          for issue_url in $(echo "$linked_issue_urls")
+          do
 
-          #  issue=$(echo "$issue_url"| awk -F\/ '{print $NF}' || true)
+            issue=$(echo "$issue_url"| awk -F\/ '{print $NF}' || true)
 
-          #  [ -z "$issue" ] && {
-          #    echo "::error::Cannot determine issue number from $issue_url for PR $pr"
-          #    exit 1
-          #  }
+            [ -z "$issue" ] && {
+              echo "::error::Cannot determine issue number from $issue_url for PR $pr"
+              exit 1
+            }
 
-          #  labels=$(hub-util.sh list-labels-for-issue "$issue")
+            labels=$(hub-util.sh list-labels-for-issue "$issue")
             
-          #  label_names=$(echo $labels | jq -r '.[].name')
+            label_names=$(echo $labels | jq -r '.[].name')
 
-          #  if [[ "$label_names" =~ "bug" && "$label_names" != *"no-backport-needed"* ]]; then
-          #    echo "::set-output name=has_bug::true"
-          #    break
-          #  fi
-          #
-          #done
+            if [[ "$label_names" =~ "bug" ]]; then
+              has_bug=true
+              break
+            fi
+          
+          done
 
-          labels=$(hub-util.sh list-labels-for-pr || true)
-          echo "$labels"
-      
+          pr_labels=$(hub-util.sh list-labels-for-pr "$pr" || true)
+          pr_label_names=$(echo $pr_labels | jq -r '.[].name')
+
+          has_backport_needed_label=false
+          if [[ "$pr_label_names" =~ "backport-needed" ]]; then
+            has_backport_needed_label=true
+          fi
+
+          has_no_backport_needed_label=false
+          if [[ "$pr_label_names" =~ "no-backport-needed" ]]; then
+            has_no_backport_needed_label=true
+          fi
+
+          echo "::set-output name=add_backport_label::false"
+
+          if [[ $has_backport_needed_label || $has_bug ]]; then 
+            if [[ $has_no_backport_needed_label = false ]]; then
+              echo "::set-output name=add_backport_label::true"
+            fi
+          fi
+
+          echo "::set-output name=auto-backport-added::false"
+          if [[ "$pr_label_names" =~ "auto-backport" ]]; then
+            echo "::set-output name=auto-backport-added::true"
+          fi
+
+      - name: Add comment
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') && steps.check_for_bug.outputs.add_backport_label == 'true' && steps.auto-backport-added == 'false'}}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'This issue has been marked for auto-backporting. Add label(s) backport-to-BRANCHNAME to backport to them'
+            })
+        
+
       - name: Add backport label
-        if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') && steps.check_for_bug.outputs.has_bug == 'true' }}
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') && steps.check_for_bug.outputs.add_backport_label == 'true' }}
         uses: andymckay/labeler@e6c4322d0397f3240f0e7e30a33b5c5df2d39e90
         with:
           add-labels: "auto-backport"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+

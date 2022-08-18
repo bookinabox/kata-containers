@@ -849,10 +849,13 @@ list_labels_for_pr()
 
     [ -z "$pr" ] && die "need PR"
 
-    local pr_api_url=$(github_api \
-        -XGET "/repos/{owner}/{repo}/pulls/$pr")
+    local labels=$(github_api \
+        -XGET "/repos/{owner}/{repo}/pulls/$pr" | \
+        jq -r '.labels' || true)
+    
+    [ -z "labels" ] && die "cannot determine labels for issue $issue"
 
-    echo "$pr_api_url"
+    printf "$labels"
 }
 
 # List PRs with one or more [*] links to an issue.
