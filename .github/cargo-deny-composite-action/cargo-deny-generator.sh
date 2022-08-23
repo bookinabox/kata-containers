@@ -30,9 +30,11 @@ do
     cat >> "${cargo_deny_file}" << EOF
 
     - name: ${path}
-      uses: EmbarkStudios/cargo-deny-action@v1
       continue-on-error: true
-      with:
-        arguments: --manifest-path ${path}
+      shell: bash
+      run: |
+        pushd $(dirname ${path})
+        cargo deny check
+        popd
 EOF
 done

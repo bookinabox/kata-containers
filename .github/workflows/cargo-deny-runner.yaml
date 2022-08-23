@@ -9,20 +9,13 @@ jobs:
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         uses: actions/checkout@v3
 
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
       - name: Generate Action
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         run: bash cargo-deny-generator.sh
         working-directory: ./.github/cargo-deny-composite-action/
         env:
           GOPATH: ${{ runner.workspace }}/kata-containers
+
       - name: Run Action
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         uses: ./.github/cargo-deny-composite-action
