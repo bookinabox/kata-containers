@@ -6,11 +6,8 @@
 
 name: 'Cargo Crates Check'
 description: 'Checks every Cargo.toml file using cargo-deny'
-inputs:
-  command:
-    description: Either 'advisories' or 'bans licenses sources'
-    required: true
-
+env:
+  CARGO_TERM_COLOR: always
 runs:
   using: "composite"
   steps:
