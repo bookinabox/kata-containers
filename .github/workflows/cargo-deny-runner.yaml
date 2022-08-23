@@ -3,11 +3,6 @@ on: [pull_request]
 jobs:
   cargo-deny-runner:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        checks:
-          - advisories
-          - bans licenses sources
 
     steps:
       - name: Checkout Code
@@ -22,5 +17,3 @@ jobs:
       - name: Run Action
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'force-skip-ci') }}
         uses: ./.github/cargo-deny-composite-action
-        with:
-          command: ${{ matrix.checks }}

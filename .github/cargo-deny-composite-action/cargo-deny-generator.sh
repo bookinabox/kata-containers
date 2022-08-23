@@ -30,10 +30,9 @@ do
     cat >> "${cargo_deny_file}" << EOF
 
     - name: ${path}
-      if: \${{ always() }}
       uses: EmbarkStudios/cargo-deny-action@v1
+      continue-on-error: true
       with:
         arguments: --manifest-path ${path}
-        command: check \${{ inputs.command }}      
 EOF
 done
