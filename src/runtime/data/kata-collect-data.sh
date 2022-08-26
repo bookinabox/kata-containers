@@ -887,6 +887,22 @@ show_third_party_tools()
 
 }
 
+show_kata_installion_type()
+{
+	start_section
+
+	# Check for kata-deploy through configurations
+	# kata-deploy requires k8s to be installed
+	if have_cmd  "kubectl"; then
+		if [[ $(kubectl -n kube-system wait --for=condition=Ready -l name=kata-deploy pod 2>/dev/null) ]]; then
+			# Kata-deploy is installed
+			msg "Kata-deploy configuration is currently enabled"
+		fi
+	fi
+
+	end_section
+}
+
 show_details()
 {
 	show_header
@@ -902,6 +918,7 @@ show_details()
 	show_package_versions
 	show_kata_monitor_version
 	show_third_party_tools
+	show_kata_installion_type
 
 	show_footer
 }
